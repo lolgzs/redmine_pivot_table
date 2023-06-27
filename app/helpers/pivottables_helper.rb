@@ -68,7 +68,7 @@ module PivottablesHelper
 
     strpformat = ""
     if Setting.date_format == ""
-      strpformat = I18n.t(:"date.formats.default", {:locale => I18n.locale })
+      strpformat = I18n.t(:"date.formats.default") #, {:locale => I18n.locale })
     else
       strpformat = Setting.date_format
     end
@@ -85,11 +85,17 @@ module PivottablesHelper
 	elsif c.name.to_s.end_with?("_date") ||
 	      (c.is_a?(QueryCustomFieldColumn) && c.custom_field.field_format == "date")
 	  formatted_issue[c.caption] = column_content(c, i)
-	  if column_content(c, i).to_s != ""
-	    formatted_issue[c.caption+"(U)"] = Date.strptime(column_content(c, i), strpformat).strftime("%Y-W%U")
-	  else
-	    formatted_issue[c.caption+"(U)"] = ""
-	  end
+    if column_content(c, i).to_s != ""
+      parsed_date = Date.strptime(column_content(c, i), strpformat)
+      formatted_issue[c.caption+" (Week)"] = parsed_date.strftime("%Y-W%U")
+      formatted_issue[c.caption+" (Month)"] = parsed_date.strftime("%Y-%m")
+      quarter = (parsed_date.month-1)/3 + 1
+      formatted_issue[c.caption+" (Quarter)"] = parsed_date.strftime("%Y-Q")+quarter.to_s
+    else
+      formatted_issue[c.caption+" (Week)"] = ""
+      formatted_issue[c.caption+" (Month)"] = ""
+      formatted_issue[c.caption+" (Quarter)"] = ""
+    end
         elsif c.name.to_s == "spent_hours"
           formatted_issue[c.caption] = l_hours_short(i.spent_hours)
         elsif c.name.to_s == "total_estimated_hours"
