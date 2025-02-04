@@ -82,20 +82,21 @@ module PivottablesHelper
           formatted_issue[c.caption] = c.value_object(i).to_s
         elsif c.name.to_s == "subject"
           formatted_issue[c.caption] = strip_tags(column_content(c, i))
-	elsif c.name.to_s.end_with?("_date") ||
-	      (c.is_a?(QueryCustomFieldColumn) && c.custom_field.field_format == "date")
-	  formatted_issue[c.caption] = column_content(c, i)
-    if column_content(c, i).to_s != ""
-      parsed_date = Date.strptime(column_content(c, i), strpformat)
-      formatted_issue[c.caption+" (Week)"] = parsed_date.strftime("%Y-W%U")
-      formatted_issue[c.caption+" (Month)"] = parsed_date.strftime("%Y-%m")
-      quarter = (parsed_date.month-1)/3 + 1
-      formatted_issue[c.caption+" (Quarter)"] = parsed_date.strftime("%Y-Q")+quarter.to_s
-    else
-      formatted_issue[c.caption+" (Week)"] = ""
-      formatted_issue[c.caption+" (Month)"] = ""
-      formatted_issue[c.caption+" (Quarter)"] = ""
-    end
+      	elsif c.name.to_s.end_with?("_date") ||
+	            (c.is_a?(QueryCustomFieldColumn) && c.custom_field.field_format == "date") ||
+              (c.name.to_s == "created_on" || c.name.to_s == "updated_on" || c.name.to_s == "closed_on")
+	        formatted_issue[c.caption] = column_content(c, i)
+          if column_content(c, i).to_s != ""
+            parsed_date = Date.strptime(column_content(c, i), strpformat)
+            formatted_issue[c.caption+" (Week)"] = parsed_date.strftime("%Y-W%U")
+            formatted_issue[c.caption+" (Month)"] = parsed_date.strftime("%Y-%m")
+            quarter = (parsed_date.month-1)/3 + 1
+            formatted_issue[c.caption+" (Quarter)"] = parsed_date.strftime("%Y-Q")+quarter.to_s
+          else
+            formatted_issue[c.caption+" (Week)"] = ""
+            formatted_issue[c.caption+" (Month)"] = ""
+            formatted_issue[c.caption+" (Quarter)"] = ""
+          end
         elsif c.name.to_s == "spent_hours"
           formatted_issue[c.caption] = l_hours_short(i.spent_hours)
         elsif c.name.to_s == "total_estimated_hours"
